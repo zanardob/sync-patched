@@ -9,8 +9,9 @@ from the official ReVanced bundle and from TheLastWallaby's
 | Patch | What it does |
 |---|---|
 | Fix swipe back transparency | Sync converts activities to and from translucent by reflecting into hidden `Activity` methods. Android 11 added `Activity.setTranslucent(boolean)` and the hidden calls now fail silently, so the screen under the gesture stays opaque and swiping back from a post shows black until the transition ends. The patch replaces both helpers with the public API on API 30+, and keeps Sync's original code path below API 30 and as a fallback. |
+| Select and copy post text | Comments open Comment actions and then Select text or Copy text. Posts have no equivalent, because the post options sheet declares its rows in XML and only offers title, permalink, link and username in its Copy dialog. The patch adds a Select text row above Copy that opens the same selection dialog the comment sheet uses, and adds Copy text to the Copy dialog on every post. Copy text writes the rendered body, or the title and the link when a post has no body. |
 
-The patch is a port of `wchill/patcheddit#135` to the ReVanced patcher API.
+The swipe patch is a port of `wchill/patcheddit#135` to the ReVanced patcher API.
 
 ## Requirements
 
@@ -70,9 +71,16 @@ ported before it can live here, which for most Sync patches means changing the
 
 ## Status
 
-The bundle compiles against patcher 22.0.0 and builds clean. The reverse-conversion
-matcher tries the hidden method names Sync looks up, then falls back to the sibling
-`(Activity)V` signature in the same class. Neither matcher has been run against an
-APK yet. If patching fails, dump the class that contains
-`Converting activity from translucent: ` and adjust the two matchers in
-`FixSwipeBackTransparencyPatch.kt`.
+The bundle compiles against patcher 22.0.0 and builds clean. Both patches apply to
+Sync `v23.06.30-13:39` (version code 23033). No build has been run on a device.
+
+Fix swipe back transparency replaces the two reflection helpers in the class that
+holds `Converting activity from translucent: `. The reverse conversion is matched by
+the hidden method names Sync looks up, and by the sibling `(Activity)V` signature in
+the same class if those names move.
+
+Select and copy post text derives every resource id and every obfuscated reference
+from the APK at patch time, and fails with a message that names the missing piece
+instead of patching something unrelated. The dialog reuses the comment sheet's
+layout and builder, and the row reuses a ButterKnife listener generated for the post
+options sheet, so the patch adds no classes of its own.
