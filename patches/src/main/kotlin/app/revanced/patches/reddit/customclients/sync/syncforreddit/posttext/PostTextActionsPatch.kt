@@ -50,6 +50,23 @@ private const val ACCESSOR = "$MODEL->N0()Ljava/lang/String;"
 /** The raw body, as markdown. Sync shows this in its own post selection dialog. */
 private const val RAW_ACCESSOR = "$MODEL->P0()Ljava/lang/String;"
 
+private const val TITLE = "$MODEL->b1()Ljava/lang/String;"
+
+private const val LINK = "$MODEL->e1()Ljava/lang/String;"
+
+private const val STRING_UTILS = "Lorg/apache/commons/lang3/StringUtils;"
+
+/** Returns null for a null, empty or blank string, so the composition can skip a part. */
+private const val TRIM_TO_NULL =
+    "$STRING_UTILS->trimToNull(Ljava/lang/String;)Ljava/lang/String;"
+
+private const val TRIM_TO_EMPTY =
+    "$STRING_UTILS->trimToEmpty(Ljava/lang/String;)Ljava/lang/String;"
+
+private const val CONCAT = "Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;"
+
+private const val TO_STRING = "Ljava/lang/CharSequence;->toString()Ljava/lang/String;"
+
 private const val COPY_TO_CLIPBOARD =
     "$REDDIT_HELPER->b(Ljava/lang/CharSequence;Landroid/content/Context;)V"
 
@@ -194,35 +211,43 @@ val postTextActionsPatch = bytecodePatch(
                 :post_text_select
                 invoke-virtual {p1}, Landroid/view/View;->getContext()Landroid/content/Context;
                 move-result-object v0
-                iget-object v1, p0, $SHEET->P0:$MODEL
-                invoke-virtual {v1}, $ACCESSOR
-                move-result-object v1
-                invoke-static {v1}, $HTML_TO_TEXT
-                move-result-object v1
-                invoke-static {v1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
-                move-result v2
-                if-eqz v2, :post_text_select_inflate
-                iget-object v1, p0, $SHEET->P0:$MODEL
-                invoke-virtual {v1}, $RAW_ACCESSOR
-                move-result-object v1
-                invoke-static {v1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
-                move-result v2
-                if-eqz v2, :post_text_select_inflate
-                new-instance v2, Ljava/lang/StringBuilder;
-                invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
-                iget-object v1, p0, $SHEET->P0:$MODEL
-                invoke-virtual {v1}, $MODEL->b1()Ljava/lang/String;
-                move-result-object v1
-                invoke-virtual {v2, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                const-string v1, ""
+                iget-object v2, p0, $SHEET->P0:$MODEL
+                invoke-virtual {v2}, $ACCESSOR
+                move-result-object v2
+                invoke-static {v2}, $HTML_TO_TEXT
+                move-result-object v2
+                if-eqz v2, :post_text_select_raw
+                invoke-interface {v2}, $TO_STRING
+                move-result-object v2
+                invoke-static {v2}, $TRIM_TO_NULL
+                move-result-object v2
+                if-nez v2, :post_text_select_append
+                :post_text_select_raw
+                iget-object v2, p0, $SHEET->P0:$MODEL
+                invoke-virtual {v2}, $RAW_ACCESSOR
+                move-result-object v2
+                invoke-static {v2}, $TRIM_TO_NULL
+                move-result-object v2
+                if-nez v2, :post_text_select_append
+                iget-object v2, p0, $SHEET->P0:$MODEL
+                invoke-virtual {v2}, $LINK
+                move-result-object v2
+                invoke-static {v2}, $TRIM_TO_NULL
+                move-result-object v2
+                if-eqz v2, :post_text_select_title
+                :post_text_select_append
                 const-string v1, "\n"
-                invoke-virtual {v2, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                iget-object v1, p0, $SHEET->P0:$MODEL
-                invoke-virtual {v1}, $MODEL->e1()Ljava/lang/String;
+                invoke-virtual {v1, v2}, $CONCAT
                 move-result-object v1
-                invoke-virtual {v2, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+                :post_text_select_title
+                iget-object v2, p0, $SHEET->P0:$MODEL
+                invoke-virtual {v2}, $TITLE
+                move-result-object v2
+                invoke-static {v2}, $TRIM_TO_EMPTY
+                move-result-object v2
+                invoke-virtual {v2, v1}, $CONCAT
                 move-result-object v1
-                :post_text_select_inflate
                 const v2, 0x${dialogLayout.toUInt().toString(16)}
                 const/4 v3, 0x0
                 invoke-static {v0, v2, v3}, Landroid/view/View;->inflate(Landroid/content/Context;ILandroid/view/ViewGroup;)Landroid/view/View;
@@ -320,30 +345,38 @@ val postTextActionsPatch = bytecodePatch(
                 move-result-object p1
                 invoke-static {p1}, $HTML_TO_TEXT
                 move-result-object p1
-                invoke-static {p1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
-                move-result v0
-                if-eqz v0, :post_text_copy_body
+                const-string v0, ""
+                if-eqz p1, :post_text_copy_raw
+                invoke-interface {p1}, $TO_STRING
+                move-result-object p1
+                invoke-static {p1}, $TRIM_TO_NULL
+                move-result-object p1
+                if-nez p1, :post_text_copy_append
+                :post_text_copy_raw
                 iget-object p1, p0, ${copyDialog.type}->Q0:$MODEL
                 invoke-virtual {p1}, $RAW_ACCESSOR
                 move-result-object p1
-                invoke-static {p1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
-                move-result v0
-                if-eqz v0, :post_text_copy_body
-                new-instance v0, Ljava/lang/StringBuilder;
-                invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
+                invoke-static {p1}, $TRIM_TO_NULL
+                move-result-object p1
+                if-nez p1, :post_text_copy_append
                 iget-object p1, p0, ${copyDialog.type}->Q0:$MODEL
-                invoke-virtual {p1}, $MODEL->b1()Ljava/lang/String;
+                invoke-virtual {p1}, $LINK
                 move-result-object p1
-                invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                const-string p1, "\n"
-                invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                invoke-static {p1}, $TRIM_TO_NULL
+                move-result-object p1
+                if-eqz p1, :post_text_copy_title
+                :post_text_copy_append
+                const-string v0, "\n"
+                invoke-virtual {v0, p1}, $CONCAT
+                move-result-object v0
+                :post_text_copy_title
                 iget-object p1, p0, ${copyDialog.type}->Q0:$MODEL
-                invoke-virtual {p1}, $MODEL->e1()Ljava/lang/String;
+                invoke-virtual {p1}, $TITLE
                 move-result-object p1
-                invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+                invoke-static {p1}, $TRIM_TO_EMPTY
                 move-result-object p1
-                :post_text_copy_body
+                invoke-virtual {p1, v0}, $CONCAT
+                move-result-object p1
                 invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->B0()Landroidx/fragment/app/FragmentActivity;
                 move-result-object v0
                 invoke-static {p1, v0}, $COPY_TO_CLIPBOARD

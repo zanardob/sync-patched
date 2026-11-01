@@ -9,7 +9,7 @@ bundle. All three bundles can load at the same time.
 | Patch | What it does |
 |---|---|
 | Fix swipe back transparency | Sync converts activities to and from translucent with hidden `Activity` methods. Android 11 added the public `Activity.setTranslucent(boolean)`. The hidden calls now fail without an error. The screen under the gesture stays opaque, and a swipe back from a post shows black until the transition ends. The patch replaces both helpers with the public API on API 30 and later. Sync's original code path stays below API 30 and as a fallback. |
-| Select and copy post text | Comments open Comment actions and then Select text or Copy text. Posts have no equivalent. The post options sheet declares its rows in XML and offers only title, permalink, link, and username in its Copy dialog. The patch adds a Select text row above Copy. The row opens the selection dialog that the comment sheet uses. The patch also adds Copy text to the Copy dialog on every post. Copy text writes the rendered body. When a post has no body, Copy text writes the title and the link. |
+| Select and copy post text | Comments open Comment actions and then Select text or Copy text. Posts have no equivalent. The post options sheet declares its rows in XML and offers only title, permalink, link, and username in its Copy dialog. The patch adds a Select text row above Copy. The row opens the selection dialog that the comment sheet uses. The patch also adds Copy text to the Copy dialog on every post. Select text and Copy text write the title, then the body. When a post has no body, they write the link instead. |
 
 ## Download
 
