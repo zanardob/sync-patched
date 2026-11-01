@@ -14,7 +14,6 @@ bundle. All three bundles can load at the same time.
 ## Download
 
 The latest bundle is on the [releases page](https://github.com/zanardob/sync-patched/releases).
-Each release carries `patches.rvp`, a plain `.rvp` and not a zip.
 
 ## Requirements
 
@@ -85,26 +84,3 @@ The feed points at the `patches.rvp` of the newest release.
 Another option is to download `patches.rvp` from Releases and add it as a local
 source. Manager keeps one patch list per source and combines the lists at patch
 time.
-
-## Ecosystem note
-
-ReVanced bundles (`.rvp`) and Morphe bundles (`.mpp`) are not interchangeable.
-ReVanced CLI and ReVanced Manager load only ReVanced bundles. A Morphe-only patch
-must be ported before it can live here. Most Sync patches need changes to the
-`app.morphe` imports, the compatibility declaration, and the fingerprint style.
-
-## Status
-
-The bundle compiles against patcher 22.0.0 and builds without errors. Both patches
-apply to Sync `v23.06.30-13:39` (version code 23033). No build has run on a device.
-
-Fix swipe back transparency replaces the two reflection helpers in the class that
-holds `Converting activity from translucent: `. The patch matches the reverse
-conversion by the hidden method names that Sync looks up. If those names move, the
-patch matches the sibling `(Activity)V` signature in the same class.
-
-Select and copy post text derives every resource id and every obfuscated reference
-from the APK at patch time. If a piece is missing, the patch fails with a message
-that names it, and it does not patch something unrelated. The dialog reuses the
-layout and builder of the comment sheet. The row reuses a ButterKnife listener
-generated for the post options sheet, so the patch adds no classes of its own.
