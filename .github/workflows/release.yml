@@ -37,9 +37,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           version="${GITHUB_REF_NAME#v}"
-          gh release create "$GITHUB_REF_NAME" \
-            "patches/build/libs/patches-${version}.rvp#patches.rvp" \
-            --verify-tag --generate-notes
+          mv "patches/build/libs/patches-${version}.rvp" patches.rvp
+          gh release create "$GITHUB_REF_NAME" patches.rvp --verify-tag --generate-notes
 
   feeds:
     needs: release
