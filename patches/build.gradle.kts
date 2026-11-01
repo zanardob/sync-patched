@@ -2,7 +2,7 @@ group = "app.revanced"
 
 patches {
     about {
-        name = "Sync for Reddit patches"
+        name = "Zanardo's Patches"
         description = "Personal ReVanced patches for Sync for Reddit"
         source = "git@github.com:zanardob/sync-patched.git"
         author = "zanardob"
