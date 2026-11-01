@@ -44,7 +44,11 @@ private const val FIND_VIEW = "Landroid/view/View;->findViewById(I)Landroid/view
 
 private const val HTML_TO_TEXT = "$REDDIT_HELPER->j(Ljava/lang/String;)Ljava/lang/CharSequence;"
 
+/** The processed body, as HTML. */
 private const val ACCESSOR = "$MODEL->N0()Ljava/lang/String;"
+
+/** The raw body, as markdown. Sync shows this in its own post selection dialog. */
+private const val RAW_ACCESSOR = "$MODEL->P0()Ljava/lang/String;"
 
 private const val COPY_TO_CLIPBOARD =
     "$REDDIT_HELPER->b(Ljava/lang/CharSequence;Landroid/content/Context;)V"
@@ -183,9 +187,9 @@ val postTextActionsPatch = bytecodePatch(
                 const-string v1, "$ROW_TAG"
                 invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
                 move-result v1
-                if-eqz v1, :post_text_select
+                if-nez v1, :post_text_select
                 instance-of v1, v0, Landroid/util/Pair;
-                if-eqz v1, :post_text_copy
+                if-nez v1, :post_text_copy
                 goto :post_text_dispatch
                 :post_text_select
                 invoke-virtual {p1}, Landroid/view/View;->getContext()Landroid/content/Context;
@@ -197,7 +201,13 @@ val postTextActionsPatch = bytecodePatch(
                 move-result-object v1
                 invoke-static {v1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
                 move-result v2
-                if-nez v2, :post_text_select_inflate
+                if-eqz v2, :post_text_select_inflate
+                iget-object v1, p0, $SHEET->P0:$MODEL
+                invoke-virtual {v1}, $RAW_ACCESSOR
+                move-result-object v1
+                invoke-static {v1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
+                move-result v2
+                if-eqz v2, :post_text_select_inflate
                 new-instance v2, Ljava/lang/StringBuilder;
                 invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
                 iget-object v1, p0, $SHEET->P0:$MODEL
@@ -312,7 +322,13 @@ val postTextActionsPatch = bytecodePatch(
                 move-result-object p1
                 invoke-static {p1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
                 move-result v0
-                if-nez v0, :post_text_copy_body
+                if-eqz v0, :post_text_copy_body
+                iget-object p1, p0, ${copyDialog.type}->Q0:$MODEL
+                invoke-virtual {p1}, $RAW_ACCESSOR
+                move-result-object p1
+                invoke-static {p1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
+                move-result v0
+                if-eqz v0, :post_text_copy_body
                 new-instance v0, Ljava/lang/StringBuilder;
                 invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
                 iget-object p1, p0, ${copyDialog.type}->Q0:$MODEL
