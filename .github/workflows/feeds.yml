@@ -1,0 +1,39 @@
+name: Refresh Manager feed
+
+on:
+  release:
+    types: [edited, deleted]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: manager-feed
+  cancel-in-progress: false
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Refresh bundle metadata
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --slurp \
+            > "$RUNNER_TEMP/releases.json"
+          python3 scripts/update_feeds.py --releases "$RUNNER_TEMP/releases.json"
+
+      - name: Commit feed
+        run: |
+          git add bundles/stable.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update Manager feed"
+          git push origin HEAD:main

@@ -1,14 +1,17 @@
-name: Build
+name: Validations
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
   pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -24,8 +27,3 @@ jobs:
           ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ secrets.GPR_USER }}
           ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.GPR_TOKEN }}
         run: ./gradlew buildAndroid
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sync-patched
-          path: patches/build/libs/*.rvp
