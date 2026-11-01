@@ -13,6 +13,11 @@ from the official ReVanced bundle and from TheLastWallaby's
 
 The swipe patch is a port of `wchill/patcheddit#135` to the ReVanced patcher API.
 
+## Download
+
+The latest bundle is on the [releases page](https://github.com/zanardob/sync-patched/releases).
+Each release carries `patches.rvp`, a plain `.rvp` rather than a zip.
+
 ## Requirements
 
 - JDK 17 or newer. The build targets JVM 17, so a newer JDK such as 25 works too.
@@ -35,8 +40,11 @@ githubPackagesPassword=ghp_yourtoken
 ./gradlew buildAndroid
 ```
 
-Output: `patches/build/libs/patches-0.1.0.rvp`. The bundle carries both JVM classes
-and `classes.dex`, so ReVanced CLI and ReVanced Manager can both load it.
+Output: `patches/build/libs/patches-0.1.0.rvp`, named from `version` in
+`gradle.properties`. A release builds with the tag's version instead, so `v0.1.1`
+produces `patches-0.1.1.rvp` and publishes it as `patches.rvp`. The bundle carries
+both JVM classes and `classes.dex`, so ReVanced CLI and ReVanced Manager can both
+load it.
 
 `buildAndroid` skips the ABI validation task that `build` runs, because this bundle
 does not keep an API dump.
@@ -54,13 +62,24 @@ java -jar revanced-cli.jar patch \
   Sync.apk
 ```
 
-`-b` bypasses signature and provenance verification. It is required for any bundle
-that was not signed by its publisher's release workflow.
+`-b` bypasses the CLI's signature and build provenance checks. A GitHub Release
+carries neither, so `-b` stays required for this bundle.
 
 ## Use with ReVanced Manager
 
-Add the jar as a local source next to the official bundle and TheLastWallaby's
-bundle. Manager keeps one patch list per source and combines them at patch time.
+Add this feed as a remote patch source, so Manager follows new releases:
+
+```
+https://raw.githubusercontent.com/zanardob/sync-patched/main/bundles/stable.json
+```
+
+Open Patches, tap the pencil icon, choose Add patches, then Enter URL, and paste
+the URL. Leave auto-update on. The feed points at the newest release's
+`patches.rvp`.
+
+You can also download `patches.rvp` from Releases and add it as a local source
+next to the official bundle and TheLastWallaby's bundle. Manager keeps one patch
+list per source and combines them at patch time.
 
 ## Ecosystem note
 
