@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-01T13:58:36",
-  "description": "**Full Changelog**: https://github.com/zanardob/sync-patched/commits/v0.1.1",
-  "download_url": "https://github.com/zanardob/sync-patched/releases/download/v0.1.1/patches.rvp",
+  "created_at": "2026-11-01T14:36:32",
+  "description": "**Full Changelog**: https://github.com/zanardob/sync-patched/compare/v0.1.1...v0.1.2",
+  "download_url": "https://github.com/zanardob/sync-patched/releases/download/v0.1.2/patches.rvp",
   "signature_download_url": "N/A",
-  "version": "v0.1.1"
+  "version": "v0.1.2"
 }
