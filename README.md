@@ -1,33 +1,32 @@
 # sync-patched
 
-A ReVanced patch bundle that holds only my Sync for Reddit patches. It is separate
-from the official ReVanced bundle and from TheLastWallaby's
-`revanced-redditsync` bundle, so all three can be loaded at the same time.
+A ReVanced patch bundle with Sync for Reddit patches. The bundle is separate from
+the official ReVanced bundle and from TheLastWallaby's `revanced-redditsync`
+bundle. All three bundles can load at the same time.
 
 ## Patches
 
 | Patch | What it does |
 |---|---|
-| Fix swipe back transparency | Sync converts activities to and from translucent by reflecting into hidden `Activity` methods. Android 11 added `Activity.setTranslucent(boolean)` and the hidden calls now fail silently, so the screen under the gesture stays opaque and swiping back from a post shows black until the transition ends. The patch replaces both helpers with the public API on API 30+, and keeps Sync's original code path below API 30 and as a fallback. |
-| Select and copy post text | Comments open Comment actions and then Select text or Copy text. Posts have no equivalent, because the post options sheet declares its rows in XML and only offers title, permalink, link and username in its Copy dialog. The patch adds a Select text row above Copy that opens the same selection dialog the comment sheet uses, and adds Copy text to the Copy dialog on every post. Copy text writes the rendered body, or the title and the link when a post has no body. |
-
-The swipe patch is a port of `wchill/patcheddit#135` to the ReVanced patcher API.
+| Fix swipe back transparency | Sync converts activities to and from translucent with hidden `Activity` methods. Android 11 added the public `Activity.setTranslucent(boolean)`. The hidden calls now fail without an error. The screen under the gesture stays opaque, and a swipe back from a post shows black until the transition ends. The patch replaces both helpers with the public API on API 30 and later. Sync's original code path stays below API 30 and as a fallback. |
+| Select and copy post text | Comments open Comment actions and then Select text or Copy text. Posts have no equivalent. The post options sheet declares its rows in XML and offers only title, permalink, link, and username in its Copy dialog. The patch adds a Select text row above Copy. The row opens the selection dialog that the comment sheet uses. The patch also adds Copy text to the Copy dialog on every post. Copy text writes the rendered body. When a post has no body, Copy text writes the title and the link. |
 
 ## Download
 
 The latest bundle is on the [releases page](https://github.com/zanardob/sync-patched/releases).
-Each release carries `patches.rvp`, a plain `.rvp` rather than a zip.
+Each release carries `patches.rvp`, a plain `.rvp` and not a zip.
 
 ## Requirements
 
-- JDK 17 or newer. The build targets JVM 17, so a newer JDK such as 25 works too.
+- JDK 17 or newer. The build targets JVM 17. A newer JDK, such as 25, also works.
 - A classic GitHub personal access token with the `read:packages` scope. The
-  `app.revanced.patches` Gradle plugin and `app.revanced:patcher` are published to
-  GitHub Packages, which does not serve artifacts anonymously and does not accept
-  fine-grained tokens.
+  `app.revanced.patches` Gradle plugin and `app.revanced:patcher` come from
+  GitHub Packages. GitHub Packages does not serve artifacts without a token, and
+  it does not accept fine-grained tokens.
 
 Put the token in `~/.gradle/gradle.properties`. Both repositories are named
-`githubPackages`, so one pair covers the plugin and its dependencies:
+`githubPackages`, so one pair of properties covers the plugin and its
+dependencies:
 
 ```properties
 githubPackagesUsername=your-github-username
@@ -40,14 +39,14 @@ githubPackagesPassword=ghp_yourtoken
 ./gradlew buildAndroid
 ```
 
-Output: `patches/build/libs/patches-0.1.0.rvp`, named from `version` in
-`gradle.properties`. A release builds with the tag's version instead, so `v0.1.1`
+Output: `patches/build/libs/patches-0.1.0.rvp`. The file name comes from `version`
+in `gradle.properties`. A release build uses the tag version. Tag `v0.1.1`
 produces `patches-0.1.1.rvp` and publishes it as `patches.rvp`. The bundle carries
-both JVM classes and `classes.dex`, so ReVanced CLI and ReVanced Manager can both
-load it.
+both JVM classes and `classes.dex`, so ReVanced CLI and ReVanced Manager can load
+it.
 
-`buildAndroid` skips the ABI validation task that `build` runs, because this bundle
-does not keep an API dump.
+`buildAndroid` skips the ABI validation task that `build` runs. This bundle does
+not keep an API dump.
 
 ## Use with ReVanced CLI
 
@@ -62,44 +61,50 @@ java -jar revanced-cli.jar patch \
   Sync.apk
 ```
 
-`-b` bypasses the CLI's signature and build provenance checks. A GitHub Release
-carries neither, so `-b` stays required for this bundle.
+`-b` bypasses the signature check and the build provenance check of the CLI. A
+GitHub Release carries neither signature nor provenance, so `-b` stays required
+for this bundle.
 
 ## Use with ReVanced Manager
 
-Add this feed as a remote patch source, so Manager follows new releases:
+Add this feed as a remote patch source. Manager then follows new releases:
 
 ```
 https://raw.githubusercontent.com/zanardob/sync-patched/main/bundles/stable.json
 ```
 
-Open Patches, tap the pencil icon, choose Add patches, then Enter URL, and paste
-the URL. Leave auto-update on. The feed points at the newest release's
-`patches.rvp`.
+1. Open Patches.
+2. Tap the pencil icon.
+3. Choose Add patches.
+4. Choose Enter URL.
+5. Paste the URL.
+6. Keep auto-update on.
 
-You can also download `patches.rvp` from Releases and add it as a local source
-next to the official bundle and TheLastWallaby's bundle. Manager keeps one patch
-list per source and combines them at patch time.
+The feed points at the `patches.rvp` of the newest release.
+
+Another option is to download `patches.rvp` from Releases and add it as a local
+source. Manager keeps one patch list per source and combines the lists at patch
+time.
 
 ## Ecosystem note
 
 ReVanced bundles (`.rvp`) and Morphe bundles (`.mpp`) are not interchangeable.
-ReVanced CLI and Manager only load ReVanced bundles. A Morphe-only patch has to be
-ported before it can live here, which for most Sync patches means changing the
+ReVanced CLI and ReVanced Manager load only ReVanced bundles. A Morphe-only patch
+must be ported before it can live here. Most Sync patches need changes to the
 `app.morphe` imports, the compatibility declaration, and the fingerprint style.
 
 ## Status
 
-The bundle compiles against patcher 22.0.0 and builds clean. Both patches apply to
-Sync `v23.06.30-13:39` (version code 23033). No build has been run on a device.
+The bundle compiles against patcher 22.0.0 and builds without errors. Both patches
+apply to Sync `v23.06.30-13:39` (version code 23033). No build has run on a device.
 
 Fix swipe back transparency replaces the two reflection helpers in the class that
-holds `Converting activity from translucent: `. The reverse conversion is matched by
-the hidden method names Sync looks up, and by the sibling `(Activity)V` signature in
-the same class if those names move.
+holds `Converting activity from translucent: `. The patch matches the reverse
+conversion by the hidden method names that Sync looks up. If those names move, the
+patch matches the sibling `(Activity)V` signature in the same class.
 
 Select and copy post text derives every resource id and every obfuscated reference
-from the APK at patch time, and fails with a message that names the missing piece
-instead of patching something unrelated. The dialog reuses the comment sheet's
-layout and builder, and the row reuses a ButterKnife listener generated for the post
-options sheet, so the patch adds no classes of its own.
+from the APK at patch time. If a piece is missing, the patch fails with a message
+that names it, and it does not patch something unrelated. The dialog reuses the
+layout and builder of the comment sheet. The row reuses a ButterKnife listener
+generated for the post options sheet, so the patch adds no classes of its own.
