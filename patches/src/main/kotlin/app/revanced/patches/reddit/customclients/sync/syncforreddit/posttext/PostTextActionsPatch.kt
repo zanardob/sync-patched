@@ -195,7 +195,7 @@ val postTextActionsPatch = bytecodePatch(
                 move-result-object v1
                 invoke-static {v1}, $HTML_TO_TEXT
                 move-result-object v1
-                invoke-interface {v1}, Ljava/lang/CharSequence;->length()I
+                invoke-static {v1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
                 move-result v2
                 if-nez v2, :post_text_select_inflate
                 new-instance v2, Ljava/lang/StringBuilder;
@@ -310,7 +310,7 @@ val postTextActionsPatch = bytecodePatch(
                 move-result-object p1
                 invoke-static {p1}, $HTML_TO_TEXT
                 move-result-object p1
-                invoke-interface {p1}, Ljava/lang/CharSequence;->length()I
+                invoke-static {p1}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
                 move-result v0
                 if-nez v0, :post_text_copy_body
                 new-instance v0, Ljava/lang/StringBuilder;
